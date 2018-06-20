@@ -1,4 +1,5 @@
 {-# language InstanceSigs #-}
+{-# language ScopedTypeVariables #-}
 module Data.Map.NonEmpty(
   NonEmptyMap(..) -- Generic Constructor
   -- * Construction
@@ -9,9 +10,27 @@ module Data.Map.NonEmpty(
   , insertWith -- :: Ord k => (a -> a -> a) -> k -> a -> NonEmptyMap k a -> NonEmptyMap k a
   -- * Deletion/Update
   , delete -- :: Ord k => k -> NonEmptyMap k a -> Map.Map k a
+  , adjust -- :: Ord k => (a -> a) -> k -> NonEmptyMap k a -> NonEmptyMap k a 
+  , update -- :: Ord k => (a -> Maybe a) -> k -> NonEmptyMap k a -> Map.Map k a
+  , alter  -- :: Ord k => (Maybe a -> Maybe a) -> k -> NonEmptyMap k a -> Map.Map k a
+  , alterF -- :: forall f k a. (Functor f, Ord k) => (Maybe a -> f (Maybe a)) -> k -> NonEmptyMap k a -> f (Map.Map k a)
+  -- * Query
+  , lookup -- :: Ord k => k -> NonEmptyMap k a -> Maybe a
+  , (!?)   -- :: Ord k => NonEmptyMap k a -> k -> Maybe a
+  , findWithDefault -- :: Ord k => a -> k -> NonEmptyMap k a -> a
+  , member -- :: Ord k => k -> NonEmptyMap k a -> Bool
+  , notMember -- :: Ord k => k -> NonEmptyMap k a -> Bool
+  -- * Size 
+  , size -- :: NonEmptyMap k a -> In
+  -- * Conversions
+  -- * Lists
+  , toList -- :: NonEmptyMap k a -> [(k, a)]
 ) where
 
 import qualified Data.Map                   as Map
+import Data.Maybe                           (fromMaybe, isJust)
+import Prelude                              hiding (lookup)
+
 
 -- A NonEmptyMap of keys k to values a
 data NonEmptyMap k a = NonEmptyMap (k, a) (Map.Map k a)
@@ -48,3 +67,56 @@ insertWith f key value (NonEmptyMap (k, a) m)             = NonEmptyMap (k, a) (
 delete :: Ord k => k -> NonEmptyMap k a -> Map.Map k a
 delete key (NonEmptyMap (k, a) m) | key == k  = m
 delete key (NonEmptyMap (k, a) m)             = Map.insert k a (Map.delete k m)
+
+adjust :: Ord k => (a -> a) -> k -> NonEmptyMap k a -> NonEmptyMap k a 
+adjust f key (NonEmptyMap (k, a) m) | key == k  = NonEmptyMap (key, f a) m
+adjust f key (NonEmptyMap (k, a) m)             = NonEmptyMap (k, a) (Map.adjust f key m)
+
+update :: Ord k => (a -> Maybe a) -> k -> NonEmptyMap k a -> Map.Map k a
+update f key (NonEmptyMap (k, a) m) | key == k = case f a of
+  Just a -> Map.insert k a m
+  Nothing -> m
+update f key (NonEmptyMap (k, a) m)           = Map.insert k a (Map.update f key m)
+
+alter :: Ord k => (Maybe a -> Maybe a) -> k -> NonEmptyMap k a -> Map.Map k a
+alter f key (NonEmptyMap (k, a) m) | key == k = case f (Just a) of
+  Just a -> Map.insert k a m
+  Nothing -> m
+alter f key (NonEmptyMap (k, a) m)            = Map.insert k a (Map.alter f key m)
+
+alterF :: forall f k a. (Functor f, Ord k) => (Maybe a -> f (Maybe a)) -> k -> NonEmptyMap k a -> f (Map.Map k a) 
+alterF f key (NonEmptyMap (k, a) m) | key == k = insideF <$> f (Just a)
+  where
+    insideF :: Maybe a -> Map.Map k a
+    insideF (Just a)  = Map.insert k a m
+    insideF Nothing   = m
+alterF f key (NonEmptyMap (k, a) m)            = Map.insert k a <$> Map.alterF f key m
+
+-- Query
+
+lookup :: Ord k => k -> NonEmptyMap k a -> Maybe a
+lookup key (NonEmptyMap (k, a) m) | key == k = Just a
+lookup key (NonEmptyMap _ m)                 = Map.lookup key m
+
+(!?) :: Ord k => NonEmptyMap k a -> k -> Maybe a
+(!?) nem k = lookup k nem
+
+findWithDefault :: Ord k => a -> k -> NonEmptyMap k a -> a
+findWithDefault a key nem = fromMaybe a (lookup key nem)
+
+member :: Ord k => k -> NonEmptyMap k a -> Bool
+member key nem = isJust (lookup key nem)
+
+notMember :: Ord k => k -> NonEmptyMap k a -> Bool
+notMember k nem = not $ member k nem
+
+-- Size 
+size :: NonEmptyMap k a -> Int
+size (NonEmptyMap _ m) = 1 + Map.size m   
+
+-- Conversions
+
+
+-- Lists
+toList :: NonEmptyMap k a -> [(k, a)]
+toList (NonEmptyMap tup m) = tup : Map.toList m
