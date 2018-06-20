@@ -1,5 +1,6 @@
 {-# language InstanceSigs #-}
 {-# language ScopedTypeVariables #-}
+
 module Data.Map.NonEmpty(
   NonEmptyMap(..) -- Generic Constructor
   -- * Construction
@@ -60,10 +61,12 @@ insertWith :: Ord k => (a -> a -> a) -> k -> a -> NonEmptyMap k a -> NonEmptyMap
 insertWith f key value (NonEmptyMap (k, a) m) | key == k  = NonEmptyMap (key, f value a) m
 insertWith f key value (NonEmptyMap (k, a) m)             = NonEmptyMap (k, a) (Map.insertWith f key value m)
 -- , insertWithKey
--- , insertLookupWithKey
+-- insertWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> NonEmptyMap k a -> NonEmptyMap k a
+-- insertWithKey f key value (NonEmptyMap (k, a) m) = 
+--   bool (NonEmptyMap (key, f key value a) m) (NonEmptyMap (k, a) (Map.insertWithKey f key value m) (k == key)
+--  insertLookupWithKey
 
 -- Deletion/Update
-
 delete :: Ord k => k -> NonEmptyMap k a -> Map.Map k a
 delete key (NonEmptyMap (k, a) m) | key == k  = m
 delete key (NonEmptyMap (k, a) m)             = Map.insert k a (Map.delete k m)
