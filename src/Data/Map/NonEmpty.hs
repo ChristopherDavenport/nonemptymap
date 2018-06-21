@@ -44,6 +44,10 @@ data NonEmptyMap k a = NonEmptyMap (k, a) (Map.Map k a)
 
 -- Instances
 
+
+{--------------------------------------------------------------------
+  Eq
+--------------------------------------------------------------------}
 instance Eq2 NonEmptyMap where
   liftEq2 :: (k -> l -> Bool) -> (m -> n -> Bool) -> NonEmptyMap k m -> NonEmptyMap l n -> Bool
   liftEq2 eqk eqa nem nen =
@@ -52,6 +56,9 @@ instance Eq2 NonEmptyMap where
 instance Eq k => Eq1 (NonEmptyMap k) where
   liftEq = liftEq2 (==)
 
+{--------------------------------------------------------------------
+  Ord
+--------------------------------------------------------------------}
 instance Ord2 NonEmptyMap where
   liftCompare2 cmpk cmpv m n =
     liftCompare (liftCompare2 cmpk cmpv) (toList m) (toList n)
@@ -59,6 +66,9 @@ instance Ord2 NonEmptyMap where
 instance Ord k => Ord1 (NonEmptyMap k) where
   liftCompare = liftCompare2 compare
 
+{--------------------------------------------------------------------
+  Show
+--------------------------------------------------------------------}
 instance Show2 NonEmptyMap where
   liftShowsPrec2 spk slk spv slv d m =
     showsUnaryWith (liftShowsPrec sp sl) "fromList" d (toList m)
@@ -69,6 +79,13 @@ instance Show2 NonEmptyMap where
 instance Show k => Show1 (NonEmptyMap k) where
   liftShowsPrec = liftShowsPrec2 showsPrec showList
 
+instance (Show k, Show a) => Show (NonEmptyMap k a) where
+  showsPrec d m  = showParen (d > 10) $
+    showString "fromList " . shows (toList m)
+
+{--------------------------------------------------------------------
+  Functor
+--------------------------------------------------------------------}
 instance Functor (NonEmptyMap k) where
   fmap :: (a -> b) -> NonEmptyMap k a -> NonEmptyMap k b
   fmap f (NonEmptyMap (k, v) map) =  NonEmptyMap (k, f v) (fmap f map)
