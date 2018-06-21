@@ -57,7 +57,7 @@ import Data.Functor.Classes                 (Eq1, Eq2, liftEq2, liftEq
 import Prelude                              hiding (lookup)
 
 
--- A NonEmptyMap of keys k to values a
+-- | A NonEmptyMap of keys k to values a
 data NonEmptyMap k a = NonEmptyMap (k, a) (Map.Map k a)
 
 -- Instances
