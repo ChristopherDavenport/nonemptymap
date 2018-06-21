@@ -116,8 +116,9 @@ fromList :: Ord k => [(k, a)] -> Maybe (NonEmptyMap k a)
 fromList []       = Nothing
 fromList (x : xa) = Just $ NonEmptyMap x (Map.fromList xa)
 
--- Insertion
-
+{--------------------------------------------------------------------
+  Insertion
+--------------------------------------------------------------------}
 -- , insert
 insert :: Ord k => k -> a -> NonEmptyMap k a -> NonEmptyMap k a
 insert = insertWith const
@@ -138,7 +139,9 @@ insertLookupWithKey f key value (NonEmptyMap (k, a) m) =
   if k == key then (Just a, NonEmptyMap(key, f key value a) m)
   else fmap (NonEmptyMap (k, a)) (Map.insertLookupWithKey f key value m)
 
--- Deletion/Update
+{--------------------------------------------------------------------
+  Deletion/Update
+--------------------------------------------------------------------}
 delete :: Ord k => k -> NonEmptyMap k a -> Map.Map k a
 delete key (NonEmptyMap (k, a) m) | key == k  = m
 delete key (NonEmptyMap (k, a) m)             = Map.insert k a (Map.delete k m)
@@ -167,7 +170,9 @@ alterF f key (NonEmptyMap (k, a) m) | key == k = insideF <$> f (Just a)
     insideF Nothing   = m
 alterF f key (NonEmptyMap (k, a) m)            = Map.insert k a <$> Map.alterF f key m
 
--- Query
+{--------------------------------------------------------------------
+  Query
+--------------------------------------------------------------------}
 
 lookup :: Ord k => k -> NonEmptyMap k a -> Maybe a
 lookup key (NonEmptyMap (k, a) m) | key == k = Just a
@@ -185,12 +190,15 @@ member key nem = isJust (lookup key nem)
 notMember :: Ord k => k -> NonEmptyMap k a -> Bool
 notMember k nem = not $ member k nem
 
--- Size 
+{--------------------------------------------------------------------
+  Size
+--------------------------------------------------------------------}
 size :: NonEmptyMap k a -> Int
 size (NonEmptyMap _ m) = 1 + Map.size m   
 
--- Conversions
-
+{--------------------------------------------------------------------
+  Conversions
+--------------------------------------------------------------------}
 
 -- Lists
 toList :: NonEmptyMap k a -> [(k, a)]
