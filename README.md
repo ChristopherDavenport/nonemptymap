@@ -1,4 +1,4 @@
-# Data.Map.NonEmpty - NonEmptyMap [![Build Status](https://travis-ci.com/ChristopherDavenport/NonEmptyMap.svg?branch=master)](https://travis-ci.com/ChristopherDavenport/NonEmptyMap)
+# Data.Map.NonEmpty - NonEmptyMap [![Build Status](https://travis-ci.com/ChristopherDavenport/nonemptymap.svg?branch=master)](https://travis-ci.com/ChristopherDavenport/nonemptymap)
 
 This map implementation is a NonEmptyMap that can be used where that is necessary. Hopefully slowly porting over more and more functions from the containers libraries.
 
