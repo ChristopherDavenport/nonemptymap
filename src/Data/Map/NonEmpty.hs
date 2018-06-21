@@ -57,6 +57,7 @@ import Data.Functor.Classes                 (Eq1, Eq2, liftEq2, liftEq
 import Data.Semigroup                        (Semigroup, (<>))
 import Data.Semigroup.Foldable               (Foldable1(..))
 import Data.List.NonEmpty                    (NonEmpty(..))
+import qualified Data.List.NonEmpty         as NonEmptyList
 
 import Prelude                              hiding (lookup)
 
@@ -130,6 +131,9 @@ singleton tup = NonEmptyMap tup Map.empty
 fromList :: Ord k => [(k, a)] -> Maybe (NonEmptyMap k a)
 fromList []       = Nothing
 fromList (x : xa) = Just $ NonEmptyMap x (Map.fromList xa)
+
+fromNonEmpty :: Ord k => NonEmpty (k, a) -> NonEmptyMap k a
+fromNonEmpty nel = NonEmptyMap (NonEmptyList.head nel) (Map.fromList (NonEmptyList.tail nel))
 
 {--------------------------------------------------------------------
   Insertion
@@ -218,3 +222,9 @@ size (NonEmptyMap _ m) = 1 + Map.size m
 -- Lists
 toList :: NonEmptyMap k a -> [(k, a)]
 toList (NonEmptyMap tup m) = tup : Map.toList m
+
+toNonEmpty :: NonEmptyMap k a -> NonEmpty (k, a)
+toNonEmpty (NonEmptyMap tup m) = tup :| Map.toList m
+
+toMap :: Ord k => NonEmptyMap k a -> Map.Map k a
+toMap (NonEmptyMap (k, a) m) = Map.insert k a m
