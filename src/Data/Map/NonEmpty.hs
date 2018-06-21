@@ -138,21 +138,19 @@ fromNonEmpty nel = NonEmptyMap (NonEmptyList.head nel) (Map.fromList (NonEmptyLi
 {--------------------------------------------------------------------
   Insertion
 --------------------------------------------------------------------}
--- , insert
+
 insert :: Ord k => k -> a -> NonEmptyMap k a -> NonEmptyMap k a
 insert = insertWith const
 
--- , insertWith
 insertWith :: Ord k => (a -> a -> a) -> k -> a -> NonEmptyMap k a -> NonEmptyMap k a
 insertWith f key value (NonEmptyMap (k, a) m) | key == k  = NonEmptyMap (key, f value a) m
 insertWith f key value (NonEmptyMap (k, a) m)             = NonEmptyMap (k, a) (Map.insertWith f key value m)
--- , insertWithKey
+
 insertWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> NonEmptyMap k a -> NonEmptyMap k a
 insertWithKey f key value (NonEmptyMap (k, a) m) = 
   if k == key then NonEmptyMap (key, f key value a) m
   else NonEmptyMap (k, a) (Map.insertWithKey f key value m)
 
---  insertLookupWithKey
 insertLookupWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> NonEmptyMap k a -> (Maybe a, NonEmptyMap k a)
 insertLookupWithKey f key value (NonEmptyMap (k, a) m) = 
   if k == key then (Just a, NonEmptyMap(key, f key value a) m)
