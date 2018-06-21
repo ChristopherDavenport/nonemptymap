@@ -32,6 +32,10 @@ module Data.Map.NonEmpty(
 
 import qualified Data.Map                   as Map
 import Data.Maybe                           (fromMaybe, isJust)
+import Data.Functor.Classes                 (Eq1, Eq2, liftEq2, liftEq
+                                            , Ord1, Ord2, liftCompare2, liftCompare
+                                            , Show1, Show2, liftShowsPrec2, showsUnaryWith, liftShowsPrec, liftShowList2
+                                            , Read1, liftReadsPrec, readsData, readsUnaryWith, liftReadList)
 import Prelude                              hiding (lookup)
 
 
@@ -39,6 +43,31 @@ import Prelude                              hiding (lookup)
 data NonEmptyMap k a = NonEmptyMap (k, a) (Map.Map k a)
 
 -- Instances
+
+instance Eq2 NonEmptyMap where
+  liftEq2 :: (k -> l -> Bool) -> (m -> n -> Bool) -> NonEmptyMap k m -> NonEmptyMap l n -> Bool
+  liftEq2 eqk eqa nem nen =
+    size nen == size nen && liftEq (liftEq2 eqk eqa) (toList nem) (toList nen)
+
+instance Eq k => Eq1 (NonEmptyMap k) where
+  liftEq = liftEq2 (==)
+
+instance Ord2 NonEmptyMap where
+  liftCompare2 cmpk cmpv m n =
+    liftCompare (liftCompare2 cmpk cmpv) (toList m) (toList n)
+
+instance Ord k => Ord1 (NonEmptyMap k) where
+  liftCompare = liftCompare2 compare
+
+instance Show2 NonEmptyMap where
+  liftShowsPrec2 spk slk spv slv d m =
+    showsUnaryWith (liftShowsPrec sp sl) "fromList" d (toList m)
+    where
+      sp = liftShowsPrec2 spk slk spv slv
+      sl = liftShowList2 spk slk spv slv
+
+instance Show k => Show1 (NonEmptyMap k) where
+  liftShowsPrec = liftShowsPrec2 showsPrec showList
 
 instance Functor (NonEmptyMap k) where
   fmap :: (a -> b) -> NonEmptyMap k a -> NonEmptyMap k b
