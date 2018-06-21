@@ -54,6 +54,10 @@ import Data.Functor.Classes                 (Eq1, Eq2, liftEq2, liftEq
                                             , Ord1, Ord2, liftCompare2, liftCompare
                                             , Show1, Show2, liftShowsPrec2, showsUnaryWith, liftShowsPrec, liftShowList2
                                             , Read1, liftReadsPrec, readsData, readsUnaryWith, liftReadList)
+import Data.Semigroup                        (Semigroup, (<>))
+import Data.Semigroup.Foldable               (Foldable1(..))
+import Data.List.NonEmpty                    (NonEmpty(..))
+
 import Prelude                              hiding (lookup)
 
 
@@ -108,6 +112,17 @@ instance Functor (NonEmptyMap k) where
   fmap :: (a -> b) -> NonEmptyMap k a -> NonEmptyMap k b
   fmap f (NonEmptyMap (k, v) map) =  NonEmptyMap (k, f v) (fmap f map)
 
+{--------------------------------------------------------------------
+  Foldable
+--------------------------------------------------------------------}
+instance Foldable (NonEmptyMap k) where
+  foldr :: (a -> b -> b) -> b -> NonEmptyMap k a -> b
+  foldr f b (NonEmptyMap (k, a) m) = Map.foldr f (f a b) m
+
+instance Foldable1 (NonEmptyMap k) where
+  foldMap1 :: Semigroup m => (a -> m) -> NonEmptyMap k a -> m
+  foldMap1 f (NonEmptyMap (k, a) m) = Map.foldr ((<>) . f) (f a) m
+  
 -- Construction
 singleton :: (k, a) -> NonEmptyMap k a
 singleton tup = NonEmptyMap tup Map.empty
