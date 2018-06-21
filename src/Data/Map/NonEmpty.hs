@@ -9,6 +9,8 @@ module Data.Map.NonEmpty(
   -- * Insertion
   , insert -- :: Ord k => k -> a -> NonEmptyMap k a -> NonEmptyMap k a
   , insertWith -- :: Ord k => (a -> a -> a) -> k -> a -> NonEmptyMap k a -> NonEmptyMap k a
+  , insertWithKey -- :: Ord k => (k -> a -> a -> a) -> k -> a -> NonEmptyMap k a -> NonEmptyMap k a
+  , insertLookupWithKey -- :: Ord k => (k -> a -> a -> a) -> k -> a -> NonEmptyMap k a -> (Maybe a, NonEmptyMap k a)
   -- * Deletion/Update
   , delete -- :: Ord k => k -> NonEmptyMap k a -> Map.Map k a
   , adjust -- :: Ord k => (a -> a) -> k -> NonEmptyMap k a -> NonEmptyMap k a 
@@ -61,10 +63,16 @@ insertWith :: Ord k => (a -> a -> a) -> k -> a -> NonEmptyMap k a -> NonEmptyMap
 insertWith f key value (NonEmptyMap (k, a) m) | key == k  = NonEmptyMap (key, f value a) m
 insertWith f key value (NonEmptyMap (k, a) m)             = NonEmptyMap (k, a) (Map.insertWith f key value m)
 -- , insertWithKey
--- insertWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> NonEmptyMap k a -> NonEmptyMap k a
--- insertWithKey f key value (NonEmptyMap (k, a) m) = 
---   bool (NonEmptyMap (key, f key value a) m) (NonEmptyMap (k, a) (Map.insertWithKey f key value m) (k == key)
+insertWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> NonEmptyMap k a -> NonEmptyMap k a
+insertWithKey f key value (NonEmptyMap (k, a) m) = 
+  if k == key then NonEmptyMap (key, f key value a) m
+  else NonEmptyMap (k, a) (Map.insertWithKey f key value m)
+
 --  insertLookupWithKey
+insertLookupWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> NonEmptyMap k a -> (Maybe a, NonEmptyMap k a)
+insertLookupWithKey f key value (NonEmptyMap (k, a) m) = 
+  if k == key then (Just a, NonEmptyMap(key, f key value a) m)
+  else fmap (NonEmptyMap (k, a)) (Map.insertLookupWithKey f key value m)
 
 -- Deletion/Update
 delete :: Ord k => k -> NonEmptyMap k a -> Map.Map k a
