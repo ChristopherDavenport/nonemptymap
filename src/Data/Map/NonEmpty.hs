@@ -1,6 +1,24 @@
 {-# language InstanceSigs #-}
 {-# language ScopedTypeVariables #-}
-
+{-# language Trustworthy #-}
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Map.NonEmpty
+-- Copyright   :  (c) Christopher Davenport 2018
+-- License     :  BSD-style
+-- Maintainer  :  Chris@ChristopherDavenport.tech
+-- Portability :  portable
+--
+-- = Description
+--
+-- An efficient implementation of non-empty maps from keys to values (dictionaries).
+--
+-- Since many function names (but not the type name) clash with
+-- "Prelude" names, this module is usually imported @qualified@, e.g.
+--
+-- >  import Data.Map.NonEmpty (NonEmptyMap)
+-- >  import qualified Data.Map.NonEmpty as NonEmptyMap
+-----------------------------------------------------------------------------
 module Data.Map.NonEmpty(
   NonEmptyMap(..) -- Generic Constructor
   -- * Construction
