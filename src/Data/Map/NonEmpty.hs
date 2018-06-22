@@ -24,6 +24,7 @@ module Data.Map.NonEmpty(
   -- * Construction
   , singleton -- :: (k, a) -> NonEmptyMap k v
   , fromList -- :: Ord k => [(k, a)] -> Maybe (NonEmptyMap k a)
+  , fromNonEmpty -- :: Ord k => NonEmpty (k, a) -> NonEmptyMap k a
   -- * Insertion
   , insert -- :: Ord k => k -> a -> NonEmptyMap k a -> NonEmptyMap k a
   , insertWith -- :: Ord k => (a -> a -> a) -> k -> a -> NonEmptyMap k a -> NonEmptyMap k a
@@ -44,8 +45,9 @@ module Data.Map.NonEmpty(
   -- * Size 
   , size -- :: NonEmptyMap k a -> In
   -- * Conversions
-  -- * Lists
   , toList -- :: NonEmptyMap k a -> [(k, a)]
+  , Data.Map.NonEmpty.toNonEmpty -- :: NonEmptyMap k a -> NonEmpty (k, a)
+  , toMap -- :: Ord k => NonEmptyMap k a -> Map.Map k a
 ) where
 
 import qualified Data.Map                   as Map
