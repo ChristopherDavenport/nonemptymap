@@ -32,7 +32,7 @@ module Data.Map.NonEmpty(
   , insertLookupWithKey -- :: Ord k => (k -> a -> a -> a) -> k -> a -> NonEmptyMap k a -> (Maybe a, NonEmptyMap k a)
   -- * Deletion/Update
   , delete -- :: Ord k => k -> NonEmptyMap k a -> Map.Map k a
-  , adjust -- :: Ord k => (a -> a) -> k -> NonEmptyMap k a -> NonEmptyMap k a 
+  , adjust -- :: Ord k => (a -> a) -> k -> NonEmptyMap k a -> NonEmptyMap k a
   , update -- :: Ord k => (a -> Maybe a) -> k -> NonEmptyMap k a -> Map.Map k a
   , alter  -- :: Ord k => (Maybe a -> Maybe a) -> k -> NonEmptyMap k a -> Map.Map k a
   , alterF -- :: forall f k a. (Functor f, Ord k) => (Maybe a -> f (Maybe a)) -> k -> NonEmptyMap k a -> f (Map.Map k a)
@@ -42,7 +42,7 @@ module Data.Map.NonEmpty(
   , findWithDefault -- :: Ord k => a -> k -> NonEmptyMap k a -> a
   , member -- :: Ord k => k -> NonEmptyMap k a -> Bool
   , notMember -- :: Ord k => k -> NonEmptyMap k a -> Bool
-  -- * Size 
+  -- * Size
   , size -- :: NonEmptyMap k a -> In
   -- * Conversions
   , toList -- :: NonEmptyMap k a -> [(k, a)]
@@ -125,7 +125,7 @@ instance Foldable (NonEmptyMap k) where
 instance Foldable1 (NonEmptyMap k) where
   foldMap1 :: Semigroup m => (a -> m) -> NonEmptyMap k a -> m
   foldMap1 f (NonEmptyMap (k, a) m) = Map.foldr ((<>) . f) (f a) m
-  
+
 -- Construction
 singleton :: (k, a) -> NonEmptyMap k a
 singleton tup = NonEmptyMap tup Map.empty
@@ -149,12 +149,12 @@ insertWith f key value (NonEmptyMap (k, a) m) | key == k  = NonEmptyMap (key, f 
 insertWith f key value (NonEmptyMap (k, a) m)             = NonEmptyMap (k, a) (Map.insertWith f key value m)
 
 insertWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> NonEmptyMap k a -> NonEmptyMap k a
-insertWithKey f key value (NonEmptyMap (k, a) m) = 
+insertWithKey f key value (NonEmptyMap (k, a) m) =
   if k == key then NonEmptyMap (key, f key value a) m
   else NonEmptyMap (k, a) (Map.insertWithKey f key value m)
 
 insertLookupWithKey :: Ord k => (k -> a -> a -> a) -> k -> a -> NonEmptyMap k a -> (Maybe a, NonEmptyMap k a)
-insertLookupWithKey f key value (NonEmptyMap (k, a) m) = 
+insertLookupWithKey f key value (NonEmptyMap (k, a) m) =
   if k == key then (Just a, NonEmptyMap(key, f key value a) m)
   else fmap (NonEmptyMap (k, a)) (Map.insertLookupWithKey f key value m)
 
@@ -165,7 +165,7 @@ delete :: Ord k => k -> NonEmptyMap k a -> Map.Map k a
 delete key (NonEmptyMap (k, a) m) | key == k  = m
 delete key (NonEmptyMap (k, a) m)             = Map.insert k a (Map.delete k m)
 
-adjust :: Ord k => (a -> a) -> k -> NonEmptyMap k a -> NonEmptyMap k a 
+adjust :: Ord k => (a -> a) -> k -> NonEmptyMap k a -> NonEmptyMap k a
 adjust f key (NonEmptyMap (k, a) m) | key == k  = NonEmptyMap (key, f a) m
 adjust f key (NonEmptyMap (k, a) m)             = NonEmptyMap (k, a) (Map.adjust f key m)
 
@@ -181,7 +181,7 @@ alter f key (NonEmptyMap (k, a) m) | key == k = case f (Just a) of
   Nothing -> m
 alter f key (NonEmptyMap (k, a) m)            = Map.insert k a (Map.alter f key m)
 
-alterF :: forall f k a. (Functor f, Ord k) => (Maybe a -> f (Maybe a)) -> k -> NonEmptyMap k a -> f (Map.Map k a) 
+alterF :: forall f k a. (Functor f, Ord k) => (Maybe a -> f (Maybe a)) -> k -> NonEmptyMap k a -> f (Map.Map k a)
 alterF f key (NonEmptyMap (k, a) m) | key == k = insideF <$> f (Just a)
   where
     insideF :: Maybe a -> Map.Map k a
@@ -213,7 +213,7 @@ notMember k nem = not $ member k nem
   Size
 --------------------------------------------------------------------}
 size :: NonEmptyMap k a -> Int
-size (NonEmptyMap _ m) = 1 + Map.size m   
+size (NonEmptyMap _ m) = 1 + Map.size m
 
 {--------------------------------------------------------------------
   Conversions
@@ -228,3 +228,14 @@ toNonEmpty (NonEmptyMap tup m) = tup :| Map.toList m
 
 toMap :: Ord k => NonEmptyMap k a -> Map.Map k a
 toMap (NonEmptyMap (k, a) m) = Map.insert k a m
+
+
+{--------------------------------------------------------------------
+  Map
+--------------------------------------------------------------------}
+
+mapWithKey :: (t -> b) -> NonEmptyMap k t -> NonEmptyMap k b
+mapWithKey f (NonEmptyMap (k, v) map) =  NonEmptyMap (k, f v) (Map.map f map)
+
+map :: (t -> b) -> NonEmptyMap k t -> NonEmptyMap k b
+map = mapWithKey
