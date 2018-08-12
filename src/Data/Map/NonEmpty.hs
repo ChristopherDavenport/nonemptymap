@@ -239,3 +239,6 @@ mapWithKey f (NonEmptyMap (k, v) map) =  NonEmptyMap (k, f v) (Map.map f map)
 
 map :: (t -> b) -> NonEmptyMap k t -> NonEmptyMap k b
 map = mapWithKey
+
+mapKeys :: Ord t2 => (t -> t2) -> NonEmptyMap t a -> NonEmptyMap t2 a
+mapKeys f (NonEmptyMap (k, v) map) = NonEmptyMap (f k, v) (Map.mapKeys f map)
