@@ -60,6 +60,7 @@ import Data.Semigroup                        (Semigroup, (<>))
 import Data.Semigroup.Foldable               (Foldable1(..))
 import Data.List.NonEmpty                    (NonEmpty(..))
 import qualified Data.List.NonEmpty         as NonEmptyList
+import qualified Data.List                  as List
 
 import Prelude                              hiding (lookup)
 
@@ -136,6 +137,23 @@ fromList (x : xa) = Just $ NonEmptyMap x (Map.fromList xa)
 
 fromNonEmpty :: Ord k => NonEmpty (k, a) -> NonEmptyMap k a
 fromNonEmpty nel = NonEmptyMap (NonEmptyList.head nel) (Map.fromList (NonEmptyList.tail nel))
+
+fromListWithKey :: Ord k => (k -> a -> a -> a) -> [(k, a)] -> Maybe (NonEmptyMap k a)
+fromListWithKey _ [] = Nothing
+fromListWithKey f (x:xs) = Just $ foldlStrict ins (NonEmptyMap (fst x, snd x) Map.empty) xs
+  where
+    ins t (k, v) = insertWithKey f k v t
+
+fromListWith :: Ord k => (a -> a -> a) -> [(k, a)] -> Maybe (NonEmptyMap k a)
+fromListWith f xs = fromListWithKey (\_ x y -> f x y) xs
+
+fromNonEmptyWithKey :: Ord k => (k -> a -> a -> a) -> NonEmpty (k, a) -> NonEmptyMap k a
+fromNonEmptyWithKey f ((xk, xv) :| xs) = foldlStrict ins (NonEmptyMap (xk, xv) Map.empty) xs
+  where
+    ins t (k, v) = insertWithKey f k v t
+
+fromNonEmptyWith :: Ord k => (t -> t -> t) -> NonEmpty (k, t) -> NonEmptyMap k t
+fromNonEmptyWith f xs = fromNonEmptyWithKey (\_ x y -> f x y) xs
 
 {--------------------------------------------------------------------
   Insertion
@@ -240,5 +258,20 @@ mapWithKey f (NonEmptyMap (k, v) map) =  NonEmptyMap (k, f v) (Map.map f map)
 map :: (t -> b) -> NonEmptyMap k t -> NonEmptyMap k b
 map = mapWithKey
 
-mapKeys :: Ord t2 => (t -> t2) -> NonEmptyMap t a -> NonEmptyMap t2 a
-mapKeys f (NonEmptyMap (k, v) map) = NonEmptyMap (f k, v) (Map.mapKeys f map)
+mapKeysWith :: Ord k => (t1 -> t1 -> t1) -> (t2 -> k) -> NonEmptyMap t2 t1 -> NonEmptyMap k t1
+mapKeysWith c f = fromNonEmptyWith c . NonEmptyList.map fFirst . Data.Map.NonEmpty.toNonEmpty
+  where
+    fFirst (x, y) = (f x, y)
+
+mapKeys :: Ord k => (t2 -> k) -> NonEmptyMap t2 t1 -> NonEmptyMap k t1
+mapKeys = mapKeysWith (\x _ -> x)
+
+
+{--------------------------------------------------------------------
+  Utils
+--------------------------------------------------------------------}
+
+foldlStrict :: (a -> b -> a) -> a -> [b] -> a
+foldlStrict f z xs = case xs of
+  [] -> z
+  (x:xss) -> let z' = f z x in seq z' (foldlStrict f z' xss)
