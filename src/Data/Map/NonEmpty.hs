@@ -49,7 +49,7 @@ module Data.Map.NonEmpty(
   , Data.Map.NonEmpty.toNonEmpty -- :: NonEmptyMap k a -> NonEmpty (k, a)
   , toMap -- :: Ord k => NonEmptyMap k a -> Map.Map k a
   -- * Map
-  , Data.Map.NonEmpty.map -- :: (t -> b) -> NonEmptyMap k t -> NonEmptyMap k b
+  , map -- :: (t -> b) -> NonEmptyMap k t -> NonEmptyMap k b
   , mapWithKey -- :: (t -> b) -> NonEmptyMap k t -> NonEmptyMap k b
   , mapKeys -- :: Ord k => (t2 -> k) -> NonEmptyMap t2 t1 -> NonEmptyMap k t1
   , mapKeysWith -- Ord k => (t1 -> t1 -> t1) -> (t2 -> k) -> NonEmptyMap t2 t1 -> NonEmptyMap k t1
@@ -67,7 +67,7 @@ import Data.List.NonEmpty                    (NonEmpty(..))
 import qualified Data.List.NonEmpty         as NonEmptyList
 import qualified Data.List                  as List
 
-import Prelude                              hiding (lookup)
+import Prelude                              hiding (lookup, map)
 
 
 -- | A NonEmptyMap of keys k to values a
