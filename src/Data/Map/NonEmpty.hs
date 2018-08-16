@@ -48,6 +48,11 @@ module Data.Map.NonEmpty(
   , toList -- :: NonEmptyMap k a -> [(k, a)]
   , Data.Map.NonEmpty.toNonEmpty -- :: NonEmptyMap k a -> NonEmpty (k, a)
   , toMap -- :: Ord k => NonEmptyMap k a -> Map.Map k a
+  -- * Map
+  , Data.Map.NonEmpty.map
+  , mapWithKey
+  , mapKeys
+  , mapKeysWith
 ) where
 
 import qualified Data.Map                   as Map
