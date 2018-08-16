@@ -153,7 +153,7 @@ fromListWith :: Ord k => (a -> a -> a) -> [(k, a)] -> Maybe (NonEmptyMap k a)
 fromListWith f xs = fromListWithKey (\_ x y -> f x y) xs
 
 fromNonEmptyWithKey :: Ord k => (k -> a -> a -> a) -> NonEmpty (k, a) -> NonEmptyMap k a
-fromNonEmptyWithKey f ((xk, xv) :| xs) = foldlStrict ins (NonEmptyMap (xk, xv) Map.empty) xs
+fromNonEmptyWithKey f (x :| xs) = foldlStrict ins (NonEmptyMap x Map.empty) xs
   where
     ins t (k, v) = insertWithKey f k v t
 
