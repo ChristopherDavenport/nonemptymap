@@ -1,5 +1,5 @@
 name:                nonemptymap
-version:             0.0.5.0
+version:             0.0.6.0
 synopsis:            A NonEmptyMap Implementation
 description:         This package intends to allow general use of a NonEmptyMap
                      which is very beneficial as sometimes you want the functionality
