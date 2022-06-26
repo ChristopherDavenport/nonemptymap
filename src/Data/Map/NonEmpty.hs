@@ -90,6 +90,9 @@ instance Eq2 NonEmptyMap where
 instance Eq k => Eq1 (NonEmptyMap k) where
   liftEq = liftEq2 (==)
 
+instance (Eq k, Eq l) => Eq (NonEmptyMap k l) where
+  (==) = liftEq (==)
+
 {--------------------------------------------------------------------
   Ord
 --------------------------------------------------------------------}
@@ -99,6 +102,9 @@ instance Ord2 NonEmptyMap where
 
 instance Ord k => Ord1 (NonEmptyMap k) where
   liftCompare = liftCompare2 compare
+
+instance (Ord k, Ord l) => Ord (NonEmptyMap k l) where
+  compare = liftCompare compare
 
 {--------------------------------------------------------------------
   Show
